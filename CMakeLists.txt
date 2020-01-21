@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   message_generation
+  std_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -55,9 +56,11 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Generate services in the 'srv' folder
 add_service_files(
- FILES
- CheckTagKnown.srv
- AddTag.srv
+  DIRECTORY
+  srv
+  FILES
+  CheckTagKnown.srv
+  AddTag.srv
 )
 
 ## Generate actions in the 'action' folder
