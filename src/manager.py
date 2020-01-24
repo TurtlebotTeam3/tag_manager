@@ -4,12 +4,18 @@ import rospy
 from tag_manager.srv import CheckTagKnown, CheckTagKnownResponse
 from tag_manager.srv import AddTag, AddTagResponse
 from std_msgs.msg import Bool
+import os
+
 
 class TagManager:
 
     def __init__(self):      
         rospy.on_shutdown(self._shutdown)
         rospy.init_node('tag_manager')
+
+        script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
+        rel_path = "../StoredTag/tags.store"
+        self.abs_file_path = os.path.join(script_dir, rel_path)
 
         self.tag_list = []
         self.tag_detection_radius = 8
@@ -68,7 +74,7 @@ class TagManager:
         try:
             print("--- Loading tags ---")
             # open the file
-            file = open("./StoredTag/tags.store", "r")
+            file = open(self.abs_file_path, "r")
 
             # read every line and add to the tag list
             fileRead = file.readlines()
@@ -90,7 +96,7 @@ class TagManager:
         try:
             print("--- Storeing tags ---")
             # open the file
-            file = open("./StoredTag/tags.store", "w")
+            file = open(self.abs_file_path, "w")
 
             count = 0
             # write all entries in tag_list to the file
