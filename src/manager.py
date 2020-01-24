@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import rospy
-from tag_manager.srv import *
+from tag_manager.srv import CheckTagKnown, CheckTagKnownResponse
+from tag_manager.srv import AddTag, AddTagResponse
 from std_msgs.msg import Bool
-
 
 class TagManager:
 
@@ -15,9 +15,8 @@ class TagManager:
         self.tag_detection_radius = 8
         self._load_tags()
 
-        check_tag_known_service = rospy.Service(
-            'check_tag_known', CheckTagKnown, self._handle_check_tag_known)
-        add_tag_service = rospy.Service('add_tag', AddTag, self._handle_add_tag)
+        self.check_tag_known_service = rospy.Service('check_tag_known', CheckTagKnown, self._handle_check_tag_known)
+        self.add_tag_service = rospy.Service('add_tag', AddTag, self._handle_add_tag)
 
         # keep that shit running until shutdown
         rospy.spin()
