@@ -28,16 +28,18 @@ class TagManager:
         self.map_offset_y = 0
         self.received_map = False
 
-        self.pub_point = rospy.Publisher('tag_point',PointStamped, queue_size = 2000)
+        self.pub_point = rospy.Publisher('tag_point',PointStamped, queue_size = 500)
 
         self.check_tag_known_service = rospy.Service('check_tag_known', CheckTagKnown, self._handle_check_tag_known)
+
         self.add_tag_service = rospy.Service('add_tag', AddTag, self._handle_add_tag)
 
         self.rate = rospy.Rate(20)
         if self.received_map == True:
-            for _ in range(2000):            
+            for _ in range(500):            
                 self._publish_point(0, 0)
                 self.rate.sleep()
+            print "tag manager ready"
 
         # keep that shit running until shutdown
         rospy.spin()
