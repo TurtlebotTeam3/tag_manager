@@ -5,7 +5,8 @@ from tag_manager.srv import CheckTagKnown, CheckTagKnownResponse
 from tag_manager.srv import AddTag, AddTagResponse
 from std_msgs.msg import Bool
 import os
-
+from geometry_msgs.msg import PointStamped
+from nav_msgs.msg._OccupancyGrid import OccupancyGrid
 
 class TagManager:
 
@@ -21,11 +22,31 @@ class TagManager:
         self.tag_detection_radius = 8
         self._load_tags()
 
+        self.mapSub = rospy.Subscriber('/map', OccupancyGrid, self._map_callback)
+        self.map_resolution = 0
+        self.map_offset_x = 0
+        self.map_offset_y = 0
+        self.received_map = False
+
+        self.pub_point = rospy.Publisher('tag_point',PointStamped, queue_size = 2000)
+
         self.check_tag_known_service = rospy.Service('check_tag_known', CheckTagKnown, self._handle_check_tag_known)
         self.add_tag_service = rospy.Service('add_tag', AddTag, self._handle_add_tag)
 
+        self.rate = rospy.Rate(20)
+        if self.received_map == True:
+            for _ in range(2000):            
+                self._publish_point(0, 0)
+                self.rate.sleep()
+
         # keep that shit running until shutdown
         rospy.spin()
+
+    def _map_callback(self, data):
+        self.map_resolution = data.info.resolution
+        self.map_offset_x = data.info.origin.position.x
+        self.map_offset_y = data.info.origin.position.y
+        self.received_map = True
 
     def _shutdown(self):
         self._store_tags()
@@ -63,6 +84,9 @@ class TagManager:
         # create the response
         response = Bool()
         response.data = True
+
+        if self.received_map == True:            
+                self._publish_point(x, y)
         
         return AddTagResponse(response)
 
@@ -109,6 +133,18 @@ class TagManager:
             print("--- Storing tags to file failed ---")
         finally:
             file.close()
+
+    def _publish_point(self, x, y):
+        pt_stamped = PointStamped()
+
+        pt_stamped.header.frame_id = "map"
+        pt_stamped.header.stamp = rospy.Time.now()
+
+        pt_stamped.point.x = (x * self.map_resolution) + self.map_offset_x
+        pt_stamped.point.y = (y * self.map_resolution) + self.map_offset_y
+        pt_stamped.point.z = 0
+
+        self.pub_point.publish(pt_stamped)
 
 if __name__ == "__main__":
     try:
