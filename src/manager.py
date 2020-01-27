@@ -5,8 +5,10 @@ from tag_manager.srv import CheckTagKnown, CheckTagKnownResponse
 from tag_manager.srv import AddTag, AddTagResponse
 from std_msgs.msg import Bool
 import os
-from geometry_msgs.msg import PointStamped
+from visualization_msgs.msg import Marker
+from visualization_msgs.msg import MarkerArray
 from nav_msgs.msg._OccupancyGrid import OccupancyGrid
+
 
 class TagManager:
 
@@ -28,20 +30,13 @@ class TagManager:
         self.map_offset_y = 0
         self.received_map = False
 
-        self.pub_point = rospy.Publisher('tag_point',PointStamped, queue_size = 500)
+        self.markerArray = MarkerArray()
+        self.marker_publisher = rospy.Publisher('visualization_marker_array', MarkerArray, queue_size=100)
 
         self.check_tag_known_service = rospy.Service('check_tag_known', CheckTagKnown, self._handle_check_tag_known)
 
         self.add_tag_service = rospy.Service('add_tag', AddTag, self._handle_add_tag)
 
-        self.rate = rospy.Rate(20)
-        if self.received_map == True:
-            for _ in range(500):            
-                self._publish_point(0, 0)
-                self.rate.sleep()
-            print "tag manager ready"
-
-        # keep that shit running until shutdown
         rospy.spin()
 
     def _map_callback(self, data):
@@ -137,16 +132,33 @@ class TagManager:
             file.close()
 
     def _publish_point(self, x, y):
-        pt_stamped = PointStamped()
+        marker = Marker()
+        marker.header.frame_id = "/map"
+        marker.type = marker.SPHERE
+        marker.action = marker.ADD
+        marker.scale.x = 0.1
+        marker.scale.y = 0.1
+        marker.scale.z = 0.1
+        marker.color.r = 1.0
+        marker.color.g = 1.0
+        marker.color.b = 0.0
+        marker.color.a = 1.0
+        marker.pose.orientation.w = 1.0
+        marker.pose.position.x = (x * self.map_resolution) + self.map_offset_x
+        marker.pose.position.y = (y * self.map_resolution) + self.map_offset_y
+        marker.pose.position.z = 1
 
-        pt_stamped.header.frame_id = "map"
-        pt_stamped.header.stamp = rospy.Time.now()
+        self.markerArray.markers.append(marker)
 
-        pt_stamped.point.x = (x * self.map_resolution) + self.map_offset_x
-        pt_stamped.point.y = (y * self.map_resolution) + self.map_offset_y
-        pt_stamped.point.z = 0
+        id = 0
+        for m in self.markerArray.markers:
+            m.id = id
+            id += 1
 
-        self.pub_point.publish(pt_stamped)
+        self.marker_publisher.publish(self.markerArray)
+        
+        print "show end"
+        rospy.sleep(0.01)
 
 if __name__ == "__main__":
     try:
