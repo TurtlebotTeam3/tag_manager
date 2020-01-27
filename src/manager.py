@@ -113,7 +113,8 @@ class TagManager:
         except IOError:
             print("--- No tags loaded because ./StoredTag/tags.store does not exist---")
         finally:
-            file.close()
+            if file != None:
+                file.close()
 
     def _store_tags(self):
         file = None
