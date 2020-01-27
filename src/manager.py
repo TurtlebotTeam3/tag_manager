@@ -21,7 +21,7 @@ class TagManager:
         self.abs_file_path = os.path.join(script_dir, rel_path)
 
         self.tag_list = []
-        self.tag_detection_radius = 8
+        self.tag_detection_radius = 10
         self._load_tags()
 
         self.mapSub = rospy.Subscriber('/map', OccupancyGrid, self._map_callback)
