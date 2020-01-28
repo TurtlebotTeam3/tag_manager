@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 
+import os
 import rospy
 from tag_manager.srv import CheckTagKnown, CheckTagKnownResponse
 from tag_manager.srv import AddTag, AddTagResponse
+from tag_manager.srv import GetTags, GetTagsResponse
+
+from tag_manager.msg import TagList, TagPoint
+
 from std_msgs.msg import Bool
-import os
+
 from visualization_msgs.msg import Marker
 from visualization_msgs.msg import MarkerArray
 from nav_msgs.msg._OccupancyGrid import OccupancyGrid
@@ -34,8 +39,8 @@ class TagManager:
         self.marker_publisher = rospy.Publisher('visualization_marker_array', MarkerArray, queue_size=100)
 
         self.check_tag_known_service = rospy.Service('check_tag_known', CheckTagKnown, self._handle_check_tag_known)
-
         self.add_tag_service = rospy.Service('add_tag', AddTag, self._handle_add_tag)
+        self.get_tags_service = rospy.Service('get_tags', GetTag, self._handle_get_tags)
 
         rospy.spin()
 
@@ -86,6 +91,20 @@ class TagManager:
                 self._publish_point(x, y)
         
         return AddTagResponse(response)
+
+    def _handle_get_tags(self):
+        """
+        Handle request for tag list
+        """
+        tag_list = TagList()
+
+        for (y, x) in self.tag_list:
+            tag = TagPoint()
+            tag.x = x
+            tag.y = y
+            tag_list.tags.append(tag)
+
+        return GetTagsResponse
 
     def _load_tags(self):
         """
