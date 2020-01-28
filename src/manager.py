@@ -40,7 +40,7 @@ class TagManager:
 
         self.check_tag_known_service = rospy.Service('check_tag_known', CheckTagKnown, self._handle_check_tag_known)
         self.add_tag_service = rospy.Service('add_tag', AddTag, self._handle_add_tag)
-        self.get_tags_service = rospy.Service('get_tags', GetTag, self._handle_get_tags)
+        self.get_tags_service = rospy.Service('get_tags', GetTags, self._handle_get_tags)
 
         rospy.spin()
 
