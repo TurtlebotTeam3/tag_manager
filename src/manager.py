@@ -92,7 +92,7 @@ class TagManager:
         
         return AddTagResponse(response)
 
-    def _handle_get_tags(self):
+    def _handle_get_tags(self, data):
         """
         Handle request for tag list
         """
@@ -104,7 +104,7 @@ class TagManager:
             tag.y = y
             tag_list.tags.append(tag)
 
-        return GetTagsResponse
+        return GetTagsResponse(tag_list)
 
     def _load_tags(self):
         """
