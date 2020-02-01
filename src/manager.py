@@ -12,7 +12,7 @@ from std_msgs.msg import Bool
 
 from visualization_msgs.msg import Marker
 from visualization_msgs.msg import MarkerArray
-from nav_msgs.msg._OccupancyGrid import OccupancyGrid
+from nav_msgs.msg import OccupancyGrid, MapMetaData
 
 
 class TagManager:
@@ -29,11 +29,7 @@ class TagManager:
         self.tag_detection_radius = 10
         self._load_tags()
 
-        self.mapSub = rospy.Subscriber('/map', OccupancyGrid, self._map_callback)
-        self.map_resolution = 0
-        self.map_offset_x = 0
-        self.map_offset_y = 0
-        self.received_map = False
+        self.map_info = MapMetaData()
 
         self.markerArray = MarkerArray()
         self.marker_publisher = rospy.Publisher('visualization_marker_array', MarkerArray, queue_size=100)
@@ -42,13 +38,13 @@ class TagManager:
         self.add_tag_service = rospy.Service('add_tag', AddTag, self._handle_add_tag)
         self.get_tags_service = rospy.Service('get_tags', GetTags, self._handle_get_tags)
 
+        self._setup()
+
         rospy.spin()
 
-    def _map_callback(self, data):
-        self.map_resolution = data.info.resolution
-        self.map_offset_x = data.info.origin.position.x
-        self.map_offset_y = data.info.origin.position.y
-        self.received_map = True
+    def _setup(self):
+        map = rospy.wait_for_message('/map', OccupancyGrid)
+        self.map_info = map.info
 
     def _shutdown(self):
         self._store_tags()
@@ -87,8 +83,7 @@ class TagManager:
         response = Bool()
         response.data = True
 
-        if self.received_map == True:            
-                self._publish_point(x, y)
+        self._publish_point(x, y)
         
         return AddTagResponse(response)
 
@@ -164,8 +159,8 @@ class TagManager:
         marker.color.b = 0.0
         marker.color.a = 1.0
         marker.pose.orientation.w = 1.0
-        marker.pose.position.x = (x * self.map_resolution) + self.map_offset_x
-        marker.pose.position.y = (y * self.map_resolution) + self.map_offset_y
+        marker.pose.position.x = (x * self.map_info.resolution) + self.map_info.origin.position.x
+        marker.pose.position.y = (y * self.map_info.resolution) + self.map_info.origin.position.y
         marker.pose.position.z = 1
 
         self.markerArray.markers.append(marker)
