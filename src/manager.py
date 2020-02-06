@@ -43,7 +43,7 @@ class TagManager:
         rospy.spin()
 
     def _setup(self):
-        map = rospy.wait_for_message('/map', OccupancyGrid)
+        map = rospy.wait_for_message('map', OccupancyGrid)
         self.map_info = map.info
 
     def _shutdown(self):
