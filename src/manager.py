@@ -171,8 +171,7 @@ class TagManager:
             id += 1
 
         self.marker_publisher.publish(self.markerArray)
-        
-        print "show end"
+
         rospy.sleep(0.01)
 
 if __name__ == "__main__":
