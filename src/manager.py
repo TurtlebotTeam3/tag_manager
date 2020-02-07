@@ -59,14 +59,16 @@ class TagManager:
 
         # create the response
         response = Bool()
-        response.data = False
+        response.data = self._check_tag_x_y(x,y)
+        return CheckTagKnownResponse(response)
 
+    def _check_tag_x_y(self, x, y):
+        known = False
         for (y_known, x_known) in self.tag_list:
             if x_known >= (x - self.tag_detection_radius) and x_known <= (x + self.tag_detection_radius) and y_known >= (y - self.tag_detection_radius) and y_known <= (y + self.tag_detection_radius):
-                response.data = True
+                known = True
                 break
-        
-        return CheckTagKnownResponse(response)
+        return known
 
     def _handle_add_tag(self, data):
         """
@@ -76,12 +78,15 @@ class TagManager:
         x = data.x
         y = data.y
 
-        #store
-        self.tag_list.append((y, x))
-        
-        # create the response
+
+        known = self._check_tag_x_y(x,y) 
+
         response = Bool()
-        response.data = True
+        response.data = False
+
+        if not known:
+            self.tag_list.append((y, x))
+            response.data = True        
 
         self._publish_point(x, y)
         
