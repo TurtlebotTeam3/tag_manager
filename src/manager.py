@@ -87,8 +87,7 @@ class TagManager:
         if not known:
             self.tag_list.append((y, x))
             response.data = True        
-
-        self._publish_point(x, y)
+            self._publish_point(x, y)
         
         return AddTagResponse(response)
 
@@ -153,7 +152,7 @@ class TagManager:
 
     def _publish_point(self, x, y):
         marker = Marker()
-        marker.header.frame_id = "/map"
+        marker.header.frame_id = "Turtle4711/map"
         marker.type = marker.SPHERE
         marker.action = marker.ADD
         marker.scale.x = 0.1
