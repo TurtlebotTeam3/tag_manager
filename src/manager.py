@@ -86,8 +86,9 @@ class TagManager:
 
         if not known:
             self.tag_list.append((y, x))
-            response.data = True        
-            self._publish_point(x, y)
+            response.data = True
+            print("Added tag: y=" + str(y) + " x=" + str(x))       
+        self._publish_point(x, y)
         
         return AddTagResponse(response)
 
