@@ -1,3 +1,0 @@
-<launch>
-    <node pkg="tag_manager" type="manager.py" name="tag_manager" output="screen"></node>
-</launch>

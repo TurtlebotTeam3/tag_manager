@@ -21,9 +21,11 @@ class TagManager:
         rospy.on_shutdown(self._shutdown)
         rospy.init_node('tag_manager')
 
-        script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
-        rel_path = "../StoredTag/tags.store"
-        self.abs_file_path = os.path.join(script_dir, rel_path)
+        #script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
+        #rel_path = "../StoredTag/tags.store"
+        #self.abs_file_path = os.path.join(script_dir, rel_path)
+
+        self.abs_file_path=rospy.get_param("~tag_file")
 
         self.tag_list = []
         self.tag_detection_radius = 10
@@ -87,7 +89,7 @@ class TagManager:
         if not known:
             self.tag_list.append((y, x))
             response.data = True
-            print("Added tag: y=" + str(y) + " x=" + str(x))       
+            rospy.loginfo("Added tag: y=" + str(y) + " x=" + str(x))       
         self._publish_point(x, y)
         
         return AddTagResponse(response)
@@ -112,7 +114,7 @@ class TagManager:
         """
         file = None
         try:
-            print("--- Loading tags ---")
+            rospy.loginfo("--- Loading tags ---")
             # open the file
             file = open(self.abs_file_path, "r")
 
@@ -122,12 +124,12 @@ class TagManager:
             for line in fileRead:
                 count = count + 1
                 coords = line.strip().split(',')
-                print(coords[0] + "," + coords[1])
+                rospy.loginfo(coords[0] + "," + coords[1])
                 self.tag_list.append((int(coords[0]), int(coords[1])))
 
-            print("--- Loaded " + str(count) + " tags ---")
+            rospy.loginfo("--- Loaded " + str(count) + " tags ---")
         except IOError:
-            print("--- No tags loaded because ./StoredTag/tags.store does not exist---")
+            rospy.loginfo("--- No tags loaded because ./StoredTag/tags.store does not exist---")
         finally:
             if file != None:
                 file.close()
@@ -135,7 +137,7 @@ class TagManager:
     def _store_tags(self):
         file = None
         try:
-            print("--- Storeing tags ---")
+            rospy.loginfo("--- Storeing tags ---")
             # open the file
             file = open(self.abs_file_path, "w")
 
@@ -145,9 +147,9 @@ class TagManager:
                 count = count + 1
                 file.write(str(y) + "," + str(x) + "\n")
 
-            print("--- Stored " + str(count) + " tags ---")
+            rospy.loginfo("--- Stored " + str(count) + " tags ---")
         except IOError:
-            print("--- Storing tags to file failed ---")
+            rospy.loginfo("--- Storing tags to file failed ---")
         finally:
             file.close()
 

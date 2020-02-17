@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="tag_manager" type="manager.py" name="tag_manager" output="screen">
+        <param name="tag_file" value="/home/daniel/catkin_ws/src/tag_manager/StoredTag/tags.store"/>
+    </node>
+</launch>
