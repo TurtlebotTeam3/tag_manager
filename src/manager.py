@@ -25,7 +25,7 @@ class TagManager:
         #rel_path = "../StoredTag/tags.store"
         #self.abs_file_path = os.path.join(script_dir, rel_path)
 
-        self.abs_file_path=rospy.get_param("~tag_file")
+        self.abs_file_path=rospy.get_param("~tag_file",default="/home/daniel/catkin_ws/src/tag_manager/StoredTag/tags.store")
 
         self.tag_list = []
         self.tag_detection_radius = 10
